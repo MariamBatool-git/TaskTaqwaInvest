@@ -1,212 +1,131 @@
-import React, {useState, createRef} from 'react';
-import {
-  StyleSheet,
-  TextInput,
-  View,
-  Text,
-  ScrollView,
-  Image,
-  Keyboard,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-} from 'react-native';
- 
-import AsyncStorage from '@react-native-community/async-storage';
- 
-const Signinup = ({navigation}) => {
-  const [userEmail, setUserEmail] = useState('');
-  const [userPassword, setUserPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [errortext, setErrortext] = useState('');
- 
-  const passwordInputRef = createRef();
- 
-  const handleSubmitPress = () => {
-    setErrortext('');
-    if (!userEmail) {
-      alert('Please fill Email');
-      return;
-    }
-    if (!userPassword) {
-      alert('Please fill Password');
-      return;
-    }
-    setLoading(true);
-    let dataToSend = {email: userEmail, password: userPassword};
-    let formBody = [];
-    for (let key in dataToSend) {
-      let encodedKey = encodeURIComponent(key);
-      let encodedValue = encodeURIComponent(dataToSend[key]);
-      formBody.push(encodedKey + '=' + encodedValue);
-    }
-    formBody = formBody.join('&');
- 
-    fetch('http://localhost:3000/auth', {
-      method: 'POST',
-      body: formBody,
-      headers: {
-        //Header Defination
-        'Content-Type':
-        'application/x-www-form-urlencoded;charset=UTF-8',
-      },
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        //Hide Loader
-        setLoading(false);
-        console.log(responseJson);
-        // If server response message same as Data Matched
-        if (responseJson.status === 'success') {
-          AsyncStorage.setItem('user_id', responseJson.data.email);
-          console.log(responseJson.data.email);
-          navigation.replace('Camera');
-        } else {
-          setErrortext(responseJson.msg);
-          console.log('Please check your email id or password');
-        }
-      })
-      .catch((error) => {
-        //Hide Loader
-        setLoading(false);
-        console.error(error);
-      });
-  };
- 
-  return (
-    <View style={styles.mainBody}>
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{
-          flex: 1,
-          justifyContent: 'center',
-          alignContent: 'center',
-        }}>
-        <View>
-          <KeyboardAvoidingView enabled>
-            <View style={{alignItems: 'center'}}>
-              <Image
-                source={require('../Image/aboutreact.png')}
-                style={{
-                  width: '50%',
-                  height: 100,
-                  resizeMode: 'contain',
-                  margin: 30,
-                }}
-              />
-            </View>
-            <View style={styles.SectionStyle}>
-              <TextInput
-                style={styles.inputStyle}
-                onChangeText={(UserEmail) =>
-                  setUserEmail(UserEmail)
-                }
-                placeholder="Enter Email" //dummy@abc.com
-                placeholderTextColor="#8b9cb5"
-                autoCapitalize="none"
-                keyboardType="email-address"
-                returnKeyType="next"
-                onSubmitEditing={() =>
-                  passwordInputRef.current &&
-                  passwordInputRef.current.focus()
-                }
-                underlineColorAndroid="#f000"
-                blurOnSubmit={false}
-              />
-            </View>
-            <View style={styles.SectionStyle}>
-              <TextInput
-                style={styles.inputStyle}
-                onChangeText={(UserPassword) =>
-                  setUserPassword(UserPassword)
-                }
-                placeholder="Enter Password" //12345
-                placeholderTextColor="#8b9cb5"
-                keyboardType="default"
-                ref={passwordInputRef}
-                onSubmitEditing={Keyboard.dismiss}
-                blurOnSubmit={false}
-                secureTextEntry={true}
-                underlineColorAndroid="#f000"
-                returnKeyType="next"
-              />
-            </View>
-            {errortext != '' ? (
-              <Text style={styles.errorTextStyle}>
-                {errortext}
-              </Text>
-            ) : null}
-            <TouchableOpacity
-              style={styles.buttonStyle}
-              activeOpacity={0.5}
-              onPress={handleSubmitPress}>
-              <Text style={styles.buttonTextStyle}>LOGIN</Text>
-            </TouchableOpacity>
-            <Text
-              style={styles.registerTextStyle}
-              onPress={() => navigation.navigate('RegisterScreen')}>
-              New Here ? Register
-            </Text>
-          </KeyboardAvoidingView>
-        </View>
-      </ScrollView>
-    </View>
-  );
-};
-export default Signinup;
- 
-const styles = StyleSheet.create({
-  mainBody: {
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: '#307ecc',
-    alignContent: 'center',
-  },
-  SectionStyle: {
-    flexDirection: 'row',
-    height: 40,
-    marginTop: 20,
-    marginLeft: 35,
-    marginRight: 35,
-    margin: 10,
-  },
-  buttonStyle: {
-    backgroundColor: '#7DE24E',
-    borderWidth: 0,
-    color: '#FFFFFF',
-    borderColor: '#7DE24E',
-    height: 40,
-    alignItems: 'center',
-    borderRadius: 30,
-    marginLeft: 35,
-    marginRight: 35,
-    marginTop: 20,
-    marginBottom: 25,
-  },
-  buttonTextStyle: {
-    color: '#FFFFFF',
-    paddingVertical: 10,
-    fontSize: 16,
-  },
-  inputStyle: {
-    flex: 1,
-    color: 'white',
-    paddingLeft: 15,
-    paddingRight: 15,
-    borderWidth: 1,
-    borderRadius: 30,
-    borderColor: '#dadae8',
-  },
-  registerTextStyle: {
-    color: '#FFFFFF',
-    textAlign: 'center',
-    fontWeight: 'bold',
-    fontSize: 14,
-    alignSelf: 'center',
-    padding: 10,
-  },
-  errorTextStyle: {
-    color: 'red',
-    textAlign: 'center',
-    fontSize: 14,
-  },
+import React from "react";
+import axios from "axios";
+import { useState } from "react";
+import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, Button } from "react-native";
+//import { Alert } from "react-native";
+
+import SuperTokens from 'supertokens-react-native';
+SuperTokens.init({
+    apiDomain: "http://localhost:3000",
+    apiBasePath: "/"
 });
+const SignIn = ()=>{
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [isError, setIsError] = useState(false);
+    const [message, setMessage] = useState('');
+    const [isLogin, setIsLogin] = useState(true);
+    const API_URL = 'http://localhost:3000/signin'
+
+    const handleSubmit = (e) => {
+        console.log("button pressed")
+        var data = {
+            "email": {email},
+            "password": {password}
+         }
+         
+         var sendData = () => {
+            axios.post(url, data)
+               .then(res => console.log('Data send'))
+               .catch(err => console.log(e))
+            }
+    };
+    return(
+        <View style = {styles.container}>
+            <View style = {styles.insideContainer}>
+            <Text style = {styles.title}>
+                    Sign In
+                </Text>
+                <View style = {styles.inputContainer}>
+                    <TextInput
+                        style = {styles.email}
+                        placeholder="Email Address"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        keyboardType="email-address"/>
+                </View>
+                <View style = {styles.inputContainer}>
+                    <TextInput
+                        style = {styles.password}
+                        secureTextEntry={true}
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        keyboardType="email-address"/>
+                </View>
+                <View style = {styles.buttonContainer}>
+                    <Button
+                        style = {styles.button}
+                        title="Sign In"
+                        onPress={(e) => handleSubmit(e)}
+                        color= {'#2C3333'}
+                    />
+                </View>
+                <Text style = {styles.or}>
+                    OR
+                </Text>
+                <View style = {styles.iconContainer}>
+                    <Image
+                        style = {styles.icon}
+                        source={require('../assets/google.png')}
+                    />
+                    <View style = {styles.iconSeparator}></View>
+                    <Image
+                    style = {styles.icon}
+                    source = {require('../assets/facebook.png')}/>
+                </View>
+            </View>
+        </View>
+    );
+};
+const styles = StyleSheet.create({
+    container : {
+        flex : 1,justifyContent : 'center', alignItems : 'center'
+    },
+    insideContainer : {
+        height : 400,
+        width : 300,
+        alignItems : 'center',
+        elevation : 5,
+        backgroundColor : "#E7F6F2",
+        shadowColor : "#2C3333",
+        shadowOpacity: 0.8,
+    },
+    title : {
+        textAlign : 'center',
+        fontSize : 24,
+        fontWeight : '800',
+        marginTop : 30
+    },
+    inputContainer : {
+        marginTop : 30,
+        elevation : 2,
+        width : 260,
+        height : 50
+    },
+    email : {
+      
+    },
+    buttonContainer : {
+        paddingTop : 20,
+        width : 150
+    },
+    button : {
+    },
+    or : {
+        fontSize : 20
+    },
+    icon : {
+        width : 30,
+        height : 30
+    },
+    iconContainer : {
+        flexDirection : 'row',
+        justifyContent : "space-between"
+    },
+    iconSeparator : {
+        width : 10,
+        height : 30
+    }
+});
+export default SignIn;
