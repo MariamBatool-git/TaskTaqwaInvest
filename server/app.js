@@ -79,7 +79,6 @@ app.post("/signin", (request, response) => {
               error,
             });
           }
-          //tokenssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
           //   create JWT token
           const token = jwt.sign({
             userId: user._id,
