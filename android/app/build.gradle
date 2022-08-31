@@ -129,6 +129,10 @@ def reactNativeArchitectures() {
 }
 
 android {
+   
+    
+
+	
     ndkVersion rootProject.ext.ndkVersion
 
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -167,6 +171,7 @@ android {
             }
         }
     }
+    missingDimensionStrategy 'react-native-camera', 'general'
 
     if (isNewArchitectureEnabled()) {
         // We configure the NDK build only if you decide to opt-in for the New Architecture.
