@@ -5,10 +5,10 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, Button } fr
 //import { Alert } from "react-native";
 
 import SuperTokens from 'supertokens-react-native';
-SuperTokens.init({
+/*SuperTokens.init({
     apiDomain: "http://localhost:3000",
     apiBasePath: "/"
-});
+});*/
 const SignIn = ()=>{
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
